@@ -50,4 +50,12 @@ Open-source under the MIT License. Free for public use, modification, and distri
 # respawn-irl
 Real-life quest map for survival and safety in the city.
 
+---
+
+## 🧭 This project matters.
+
+If you're lost in the city, with no money, no language, no battery... this app will guide you to safety.  
+You're not alone.
+
+
 Initial README content
