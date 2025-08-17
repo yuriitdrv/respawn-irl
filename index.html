@@ -114,7 +114,7 @@
             margin: 0;
         }
         /* Custom marker icons */
-        .icon-toilet, .icon-food, .icon-charger, .icon-safe, .icon-unsafe, .icon-center {
+        .icon-toilet, .icon-food, .icon-charger, .icon-safe, .icon-unsafe, .icon-center, .icon-arrow {
             background-color: white;
             width: 30px;
             height: 30px;
@@ -131,12 +131,14 @@
         .icon-safe { border-color: #10b981; }
         .icon-unsafe { border-color: #ef4444; }
         .icon-center { border-color: #8b5cf6; }
+        .icon-arrow { border-color: #8b5cf6; }
         .icon-toilet i { color: #3b82f6; }
         .icon-food i { color: #10b981; }
         .icon-charger i { color: #f59e0b; }
         .icon-safe i { color: #10b981; }
         .icon-unsafe i { color: #ef4444; }
         .icon-center i { color: #8b5cf6; }
+        .icon-arrow i { color: #8b5cf6; }
 
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -149,6 +151,9 @@
     <div id="map-container">
         <div id="map"></div>
         <div class="controls">
+            <button id="locate-me-btn" class="filter-button">
+                <i class="fa-solid fa-crosshairs"></i> Найти меня
+            </button>
             <button class="filter-button active" data-filter="all">
                 <i class="fa-solid fa-list-ul"></i> Все
             </button>
@@ -180,6 +185,7 @@
                 food: L.divIcon({ className: 'icon-food', html: '<i class="fa-solid fa-utensils"></i>', iconSize: [30, 30] }),
                 charger: L.divIcon({ className: 'icon-charger', html: '<i class="fa-solid fa-charging-station"></i>', iconSize: [30, 30] }),
                 center: L.divIcon({ className: 'icon-center', html: '<i class="fa-solid fa-handshake-angle"></i>', iconSize: [30, 30] }),
+                arrow: L.divIcon({ className: 'icon-arrow', html: '<i class="fa-solid fa-location-arrow"></i>', iconSize: [30, 30] }),
             };
 
             // Hardcoded data for demonstration. In a real app, this would come from a backend.
@@ -205,7 +211,8 @@
 
             let userMarker = null;
             let markersLayer = new L.LayerGroup().addTo(map);
-            let routePolyline = null;
+            let directionalArrow = null; // New variable for the directional arrow marker
+            let destinationMarker = null; // New variable for the destination marker
 
             // Function to display a temporary status message
             function showStatusMessage(text) {
@@ -273,6 +280,20 @@
                 return R * c; // in metres
             }
 
+            // Function to calculate bearing between two points for the arrow
+            function getBearing(startLat, startLng, endLat, endLng) {
+                startLat = startLat * Math.PI / 180;
+                startLng = startLng * Math.PI / 180;
+                endLat = endLat * Math.PI / 180;
+                endLng = endLng * Math.PI / 180;
+
+                const y = Math.sin(endLng - startLng) * Math.cos(endLat);
+                const x = Math.cos(startLat) * Math.sin(endLat) -
+                          Math.sin(startLat) * Math.cos(endLat) * Math.cos(endLng - startLng);
+                const bearing = Math.atan2(y, x) * 180 / Math.PI;
+                return (bearing + 360) % 360; // Normalize to 0-360
+            }
+
             // Function to plot a route from the user's location to a specific destination
             function plotRouteToPoint(destLatLng) {
                 if (!userMarker) {
@@ -280,21 +301,43 @@
                     return;
                 }
                 
-                // Clear the previous route if it exists
-                if (routePolyline) {
-                    map.removeLayer(routePolyline);
+                // Clear the previous arrow and destination marker
+                if (directionalArrow) {
+                    map.removeLayer(directionalArrow);
+                }
+                if (destinationMarker) {
+                    map.removeLayer(destinationMarker);
                 }
 
                 const userLatLng = userMarker.getLatLng();
-                const routeCoordinates = [
-                    [userLatLng.lat, userLatLng.lng],
-                    [destLatLng.lat, destLatLng.lng]
-                ];
-                routePolyline = L.polyline(routeCoordinates, { color: '#8b5cf6', weight: 5, opacity: 0.7 }).addTo(map);
+
+                // Create the destination marker
+                destinationMarker = L.marker(destLatLng, { icon: icons.center })
+                    .bindPopup('Точка назначения.')
+                    .addTo(map);
+
+                // Calculate bearing for the arrow
+                const bearing = getBearing(userLatLng.lat, userLatLng.lng, destLatLng.lat, destLatLng.lng);
+                
+                // Create the directional arrow marker at the user's location
+                directionalArrow = L.marker(userLatLng, {
+                    icon: icons.arrow,
+                    rotationAngle: bearing,
+                    rotationOrigin: 'center center'
+                }).addTo(map);
+
+                // This is a workaround for rotating L.divIcon. It might not be needed with a custom plugin.
+                const arrowIconElement = directionalArrow.getElement();
+                if (arrowIconElement) {
+                    arrowIconElement.style.transform += ` rotate(${bearing}deg)`;
+                }
 
                 // Fit map bounds to show both user and destination
                 const bounds = L.latLngBounds(userLatLng, destLatLng);
                 map.fitBounds(bounds, { padding: [50, 50] });
+
+                const distanceKm = (getDistance(userLatLng.lat, userLatLng.lng, destLatLng.lat, destLatLng.lng) / 1000).toFixed(2);
+                showStatusMessage(`Новая точка назначения установлена. Расстояние: ${distanceKm} км.`);
             }
 
             // Function to find the nearest help center and draw a path (original "Survival Mode")
@@ -370,6 +413,14 @@
 
             // Event listener for survival mode button
             document.getElementById('survival-mode-btn').addEventListener('click', findNearestHelpCenter);
+            
+            // Event listener for "Locate Me" button
+            document.getElementById('locate-me-btn').addEventListener('click', getUserLocation);
+
+            // Event listener for map clicks to set a new destination
+            map.on('click', function(e) {
+                plotRouteToPoint(e.latlng);
+            });
 
             // Initial setup
             addMarkers('all');
