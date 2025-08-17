@@ -206,7 +206,6 @@
             let userMarker = null;
             let markersLayer = new L.LayerGroup().addTo(map);
             let routePolyline = null;
-            let routeMarker = null;
 
             // Function to display a temporary status message
             function showStatusMessage(text) {
@@ -218,18 +217,6 @@
                     messageEl.style.opacity = '0';
                     setTimeout(() => messageEl.style.display = 'none', 500);
                 }, 3000);
-            }
-
-            // Function to add all points to the map
-            function addMarkers(filter = 'all') {
-                markersLayer.clearLayers();
-                pointsData.forEach(point => {
-                    if (filter === 'all' || point.type === filter) {
-                        const marker = L.marker([point.lat, point.lng], { icon: icons[point.type] })
-                            .bindPopup(`<h4>${point.name}</h4><p>${point.description}</p>`);
-                        markersLayer.addLayer(marker);
-                    }
-                });
             }
 
             // Function to handle geolocation
@@ -286,7 +273,31 @@
                 return R * c; // in metres
             }
 
-            // Function to find the nearest help center and draw a path
+            // Function to plot a route from the user's location to a specific destination
+            function plotRouteToPoint(destLatLng) {
+                if (!userMarker) {
+                    showStatusMessage('Сначала определите свое местоположение.');
+                    return;
+                }
+                
+                // Clear the previous route if it exists
+                if (routePolyline) {
+                    map.removeLayer(routePolyline);
+                }
+
+                const userLatLng = userMarker.getLatLng();
+                const routeCoordinates = [
+                    [userLatLng.lat, userLatLng.lng],
+                    [destLatLng.lat, destLatLng.lng]
+                ];
+                routePolyline = L.polyline(routeCoordinates, { color: '#8b5cf6', weight: 5, opacity: 0.7 }).addTo(map);
+
+                // Fit map bounds to show both user and destination
+                const bounds = L.latLngBounds(userLatLng, destLatLng);
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+
+            // Function to find the nearest help center and draw a path (original "Survival Mode")
             function findNearestHelpCenter() {
                 if (!userMarker) {
                     showStatusMessage('Сначала определите свое местоположение.');
@@ -313,34 +324,38 @@
                 });
 
                 if (nearestCenter) {
-                    // Clear previous route
-                    if (routePolyline) {
-                        map.removeLayer(routePolyline);
-                    }
-                    if (routeMarker) {
-                        map.removeLayer(routeMarker);
-                    }
-
-                    // Draw a simple straight line path. For a real app, a routing API would be used.
-                    const routeCoordinates = [
-                        [userLatLng.lat, userLatLng.lng],
-                        [nearestCenter.lat, nearestCenter.lng]
-                    ];
-                    routePolyline = L.polyline(routeCoordinates, { color: '#8b5cf6', weight: 5, opacity: 0.7 }).addTo(map);
-
-                    // Add a marker to the destination
-                    routeMarker = L.marker([nearestCenter.lat, nearestCenter.lng], {
-                        icon: L.divIcon({ className: 'icon-center', html: '<i class="fa-solid fa-flag"></i>', iconSize: [30, 30] })
-                    }).addTo(map);
-
-                    // Fit map bounds to show both user and destination
-                    const bounds = L.latLngBounds(userLatLng, [nearestCenter.lat, nearestCenter.lng]);
-                    map.fitBounds(bounds, { padding: [50, 50] });
-
+                    plotRouteToPoint({ lat: nearestCenter.lat, lng: nearestCenter.lng });
                     const distanceKm = (minDistance / 1000).toFixed(2);
                     showStatusMessage(`Ближайший центр помощи: ${nearestCenter.name}, ${distanceKm} км.`);
                 }
             }
+
+
+            // Function to add all points to the map with new routing functionality
+            function addMarkers(filter = 'all') {
+                markersLayer.clearLayers();
+                pointsData.forEach(point => {
+                    if (filter === 'all' || point.type === filter) {
+                        const marker = L.marker([point.lat, point.lng], { icon: icons[point.type] });
+                        
+                        // Create popup content with a new "Plot Route" button
+                        const popupContent = document.createElement('div');
+                        popupContent.innerHTML = `
+                            <h4>${point.name}</h4>
+                            <p>${point.description}</p>
+                            <button onclick="window.plotRouteToPoint({lat: ${point.lat}, lng: ${point.lng}})"
+                                style="background-color:#3b82f6; color:white; padding:8px 12px; border:none; border-radius:6px; margin-top:10px; cursor:pointer;">
+                                Проложить маршрут
+                            </button>
+                        `;
+                        marker.bindPopup(popupContent);
+                        markersLayer.addLayer(marker);
+                    }
+                });
+            }
+
+            // Attach the plotRouteToPoint function to the window object so it can be called from the popup
+            window.plotRouteToPoint = plotRouteToPoint;
 
             // Event listeners for filter buttons
             const filterButtons = document.querySelectorAll('.filter-button');
