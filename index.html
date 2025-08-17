@@ -238,7 +238,6 @@
                 food: L.divIcon({ className: 'icon-food', html: '<i class="fa-solid fa-utensils"></i>', iconSize: [30, 30] }),
                 charger: L.divIcon({ className: 'icon-charger', html: '<i class="fa-solid fa-charging-station"></i>', iconSize: [30, 30] }),
                 center: L.divIcon({ className: 'icon-center', html: '<i class="fa-solid fa-handshake-angle"></i>', iconSize: [30, 30] }),
-                arrow: L.divIcon({ className: 'icon-arrow', html: '<i class="fa-solid fa-location-arrow"></i>', iconSize: [30, 30] }),
             };
 
             // Hardcoded data for demonstration. In a real app, this would come from a backend.
@@ -264,7 +263,7 @@
 
             let userMarker = null;
             let markersLayer = new L.LayerGroup().addTo(map);
-            let directionalArrow = null; 
+            let routeLine = null; // Variable for the route line
             let destinationMarker = null; 
 
             // Function to display a temporary status message
@@ -306,7 +305,7 @@
                             map.setView(userLatLng, 15);
                             showStatusMessage('Ваше местоположение найдено.');
 
-                            // Check if a destination is set and update the arrow
+                            // Check if a destination is set and update the line
                             if (destinationMarker) {
                                 plotRouteToPoint(destinationMarker.getLatLng());
                             }
@@ -338,23 +337,6 @@
                 return R * c; // in metres
             }
 
-            // Function to calculate bearing between two points for the arrow
-            function getBearing(startLat, startLng, endLat, endLng) {
-                const toRad = (deg) => deg * Math.PI / 180;
-                const toDeg = (rad) => rad * 180 / Math.PI;
-
-                startLat = toRad(startLat);
-                startLng = toRad(startLng);
-                endLat = toRad(endLat);
-                endLng = toRad(endLng);
-
-                const y = Math.sin(endLng - startLng) * Math.cos(endLat);
-                const x = Math.cos(startLat) * Math.sin(endLat) - Math.sin(startLat) * Math.cos(endLat) * Math.cos(endLng - startLng);
-                const bearing = toDeg(Math.atan2(y, x));
-                
-                return (bearing + 360) % 360;
-            }
-
             // Function to plot a route from the user's location to a specific destination
             function plotRouteToPoint(destLatLng) {
                 if (!userMarker) {
@@ -362,9 +344,9 @@
                     return;
                 }
                 
-                // Clear the previous arrow and destination marker
-                if (directionalArrow) {
-                    map.removeLayer(directionalArrow);
+                // Clear the previous line and destination marker
+                if (routeLine) {
+                    map.removeLayer(routeLine);
                 }
                 if (destinationMarker) {
                     map.removeLayer(destinationMarker);
@@ -377,12 +359,13 @@
                     .bindPopup('Точка назначения.')
                     .addTo(map);
 
-                // Create the directional arrow marker at the user's location
-                directionalArrow = L.marker(userLatLng, { icon: icons.arrow }).addTo(map);
-
-                // Calculate bearing for the arrow and apply rotation
-                const bearing = getBearing(userLatLng.lat, userLatLng.lng, destLatLng.lat, destLatLng.lng);
-                directionalArrow.getElement().style.transform = `rotate(${bearing}deg)`;
+                // Create the route line
+                const latlngs = [userLatLng, destLatLng];
+                routeLine = L.polyline(latlngs, {
+                    color: '#8b5cf6',
+                    weight: 5,
+                    opacity: 0.7
+                }).addTo(map);
 
                 // Fit map bounds to show both user and destination
                 const bounds = L.latLngBounds(userLatLng, destLatLng);
