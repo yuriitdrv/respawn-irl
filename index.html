@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5072213699293607"
-     crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="app-title">Respawn IRL - Реальная карта-квест</title>
+    <title id="app-title">Respawn IRL - Real Quest Map</title>
     <!-- Leaflet CSS & JS for Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha2d-p4xR2/rP+D38c1/r2f2o8g/2e7k2d/2/3f2o8g/2e7k2d/2/3f2o8g==" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha2d-p4xR2/rP+D38c1/r2f2o8g/2e7k2d/2/3f2o8g/2e7k2d/2/3f2o8g==" crossorigin=""></script>
@@ -52,7 +50,7 @@
             z-index: 1000;
             transition: all 0.3s ease-in-out;
             backdrop-filter: blur(5px);
-            width: 90%; /* Адаптивный контроль */
+            width: 90%; /* Responsive control */
             max-width: 500px;
         }
         .top-bar {
@@ -103,13 +101,7 @@
             flex-grow: 1;
             min-width: 120px;
         }
-        #lang-toggle-btn {
-            flex-grow: 0;
-            min-width: 50px;
-            font-weight: 700;
-            padding: 10px 12px;
-        }
-        /* Стили для разных типов кнопок */
+        /* Styles for different button types */
         .control-button { background-color: #e2e8f0; color: #4b5563; }
         .control-button:hover { background-color: #cbd5e1; }
         .control-button.active { background-color: #3b82f6; color: white; box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3); }
@@ -118,7 +110,7 @@
         .survival-button:hover { background-color: #dc2626; }
         .control-button i, .survival-button i { margin-right: 6px; }
 
-        /* Сообщение о статусе */
+        /* Status Message */
         .status-message {
             position: absolute;
             bottom: 20px;
@@ -137,7 +129,7 @@
             text-align: center;
         }
         
-        /* Стили для кастомных маркеров */
+        /* Custom Marker Styles */
         .icon-toilet, .icon-food, .icon-charger, .icon-center {
             background-color: white;
             width: 30px;
@@ -171,33 +163,31 @@
         <div class="controls">
             <div class="top-bar">
                 <button id="locate-me-btn" class="control-button">
-                    <i class="fa-solid fa-crosshairs"></i> Найти меня
+                    <i class="fa-solid fa-crosshairs"></i> Locate Me
                 </button>
                 <button id="survival-mode-btn" class="survival-button">
-                    <i class="fa-solid fa-compass"></i> Режим выживания
+                    <i class="fa-solid fa-compass"></i> Survival Mode
                 </button>
                 <button id="menu-toggle-btn" class="control-button" style="min-width: 50px;">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <button id="lang-toggle-btn" class="control-button">
-                    EN
-                </button>
+                <!-- Removed Language Toggle Button -->
             </div>
             <div id="filter-buttons-container" class="filter-buttons-container collapsed">
                 <button class="control-button active" data-filter="all" data-i18n="all">
-                    <i class="fa-solid fa-list-ul"></i> Все
+                    <i class="fa-solid fa-list-ul"></i> All
                 </button>
                 <button class="control-button" data-filter="toilet" data-i18n="toilets">
-                    <i class="fa-solid fa-toilet"></i> Туалеты
+                    <i class="fa-solid fa-toilet"></i> Toilets
                 </button>
                 <button class="control-button" data-filter="food" data-i18n="food">
-                    <i class="fa-solid fa-utensils"></i> Еда
+                    <i class="fa-solid fa-utensils"></i> Food
                 </button>
                 <button class="control-button" data-filter="charger" data-i18n="chargers">
-                    <i class="fa-solid fa-charging-station"></i> Зарядка
+                    <i class="fa-solid fa-charging-station"></i> Charging
                 </button>
                 <button class="control-button" data-filter="center" data-i18n="centers">
-                    <i class="fa-solid fa-handshake-angle"></i> Центры помощи
+                    <i class="fa-solid fa-handshake-angle"></i> Help Centers
                 </button>
             </div>
         </div>
@@ -207,36 +197,11 @@
     <script>
         (function() {
             // =========================================================================================
-            // ГЛОБАЛЬНАЯ ЛОКАЛИЗАЦИЯ (i18n)
+            // GLOBAL LOCALIZATION (i18n) - Locked to English
             // =========================================================================================
-            let currentLang = 'ru'; 
+            const currentLang = 'en'; 
 
             const translations = {
-                ru: {
-                    title: 'Respawn IRL - Реальная карта-квест',
-                    locate_me: 'Найти меня',
-                    survival_mode: 'Режим выживания',
-                    menu: 'Меню',
-                    all: 'Все',
-                    toilets: 'Туалеты',
-                    food: 'Еда',
-                    chargers: 'Зарядка',
-                    centers: 'Центры помощи',
-                    you_are_here: 'Вы здесь.',
-                    plot_route: 'Проложить маршрут',
-                    your_selected_point: 'Ваша выбранная точка.',
-                    location_found: 'Ваше местоположение найдено.',
-                    new_destination: (distance) => `Новая точка назначения установлена. Расстояние: ${distance} км.`,
-                    nearest_point: (name, distance) => `Ближайшая точка помощи: ${name}, ${distance} км.`,
-                    need_location: 'Сначала определите свое местоположение.',
-                    no_points: 'На карте нет доступных центров помощи или точек питания.',
-                    no_geolocation: 'Геолокация не поддерживается вашим браузером.',
-                    error_1: 'Доступ к геолокации запрещен пользователем. Разрешите доступ в настройках браузера.',
-                    error_2: 'Информация о местоположении недоступна (проверьте GPS/Wi-Fi).',
-                    error_3: 'Истекло время ожидания геолокации. Попробуйте снова.',
-                    error_default: (code) => `Ошибка геолокации (Код: ${code}).`,
-                    location_error_general: 'Не удалось определить ваше местоположение.'
-                },
                 en: {
                     title: 'Respawn IRL - Real Quest Map',
                     locate_me: 'Locate Me',
@@ -264,28 +229,25 @@
                 }
             };
 
+            // Simplified T function, always defaults to English
             function T(key, ...args) {
                 const lang = translations[currentLang];
-                const text = lang[key] || translations['ru'][key];
+                const text = lang[key] || key; // Fallback to key itself if translation is missing
                 if (typeof text === 'function') {
                     return text(...args);
                 }
-                return text || key; 
+                return text; 
             }
 
             function updateUI() {
-                // Обновление заголовка страницы
+                // Update page title
                 document.getElementById('app-title').textContent = T('title');
                 
-                // Обновление статических кнопок
-                document.getElementById('locate-me-btn').querySelector('i').nextSibling.textContent = ` ${T('locate_me')}`;
-                document.getElementById('survival-mode-btn').querySelector('i').nextSibling.textContent = ` ${T('survival_mode')}`;
-                // Кнопка меню не переводится, только иконка
+                // Static buttons are now hardcoded in HTML, so only dynamic elements remain
                 
-                // Обновление кнопок фильтров
+                // Update filter buttons (re-applies text based on T function if needed)
                 document.querySelectorAll('[data-i18n]').forEach(el => {
                     const key = el.getAttribute('data-i18n');
-                    // Предполагаем, что у фильтров есть иконки, поэтому меняем только текст после <i>
                     const textNode = el.querySelector('i') ? el.querySelector('i').nextSibling : el.firstChild;
                     if (textNode) {
                         textNode.textContent = ` ${T(key)}`;
@@ -294,17 +256,14 @@
                     }
                 });
 
-                // Обновление кнопки переключения языка
-                document.getElementById('lang-toggle-btn').textContent = currentLang === 'ru' ? 'EN' : 'RU';
-
-                // Перезагружаем маркеры, чтобы обновить всплывающие окна
+                // Reload markers to refresh popups with English content
                 const activeFilterBtn = document.querySelector('.control-button.active[data-filter]');
                 const activeFilter = activeFilterBtn ? activeFilterBtn.dataset.filter : 'all';
                 addMarkers(activeFilter);
             }
 
 
-            // --- КОНФИГУРАЦИЯ МАРКЕРОВ ---
+            // --- MARKER CONFIGURATION ---
             const icons = {
                 toilet: L.divIcon({ className: 'icon-toilet', html: '<i class="fa-solid fa-toilet"></i>', iconSize: [30, 30] }),
                 food: L.divIcon({ className: 'icon-food', html: '<i class="fa-solid fa-utensils"></i>', iconSize: [30, 30] }),
@@ -313,80 +272,64 @@
             };
 
             // =========================================================================================
-            // АКТУАЛЬНЫЕ АДРЕСА ПОМОЩИ ДУБЛИНА (с переводами)
+            // DUBLIN HELP ADDRESSES (Using English descriptions)
             // =========================================================================================
             const pointsData = [
                 { 
                     lat: 53.3395, lng: -6.2550, 
                     type: 'food', 
-                    name_ru: 'St. Brigid\'s Food Centre', 
-                    description_ru: 'Адрес: Holles Row, D2. Часы работы: Пн-Сб, 11:30–13:15. Бесплатно.',
-                    name_en: 'St. Brigid\'s Food Centre',
+                    name_en: 'St. Brigid\'s Food Centre', 
                     description_en: 'Address: Holles Row, D2. Hours: Mon-Sat, 11:30–13:15. Free.'
                 },
                 { 
                     lat: 53.3446, lng: -6.2642, 
                     type: 'food', 
-                    name_ru: 'Focus Ireland Coffee Shop', 
-                    description_ru: 'Адрес: 15 Eustace Street, D2. Часы работы: Пн, Вт, Чт, Пт, 10:00–15:30. Небольшой обед €0.80.',
-                    name_en: 'Focus Ireland Coffee Shop',
+                    name_en: 'Focus Ireland Coffee Shop', 
                     description_en: 'Address: 15 Eustace Street, D2. Hours: Mon, Tue, Thu, Fri, 10:00–15:30. Small lunch €0.80.'
                 },
                 { 
                     lat: 53.3601, lng: -6.2910, 
                     type: 'food', 
-                    name_ru: 'St. Joseph\'s Penny Dinners', 
-                    description_ru: 'Адрес: 67 Aughrim House, D7. Часы работы: Пн-Сб, 12:00–13:00 (обед). Оплата: €0.60/€0.40.',
-                    name_en: 'St. Joseph\'s Penny Dinners',
+                    name_en: 'St. Joseph\'s Penny Dinners', 
                     description_en: 'Address: 67 Aughrim House, D7. Hours: Mon-Sat, 12:00–13:00 (lunch). Cost: €0.60/€0.40.'
                 },
                 { 
                     lat: 53.3551, lng: -6.2520, 
                     type: 'food', 
-                    name_ru: 'St. Agatha\'s Food Centre', 
-                    description_ru: 'Адрес: 33 Portland Row, D1. Часы работы: Пн-Пт, 12:00–13:00. Оплата: €0.80.',
-                    name_en: 'St. Agatha\'s Food Centre',
+                    name_en: 'St. Agatha\'s Food Centre', 
                     description_en: 'Address: 33 Portland Row, D1. Hours: Mon-Fri, 12:00–13:00. Cost: €0.80.'
                 },
                 { 
                     lat: 53.3486, lng: -6.2750, 
                     type: 'center', 
-                    name_ru: 'Capuchin Day Centre (Главный центр)', 
-                    description_ru: 'Адрес: Bow St, D7. Время: 9:00-11:30 (чай/кофе), 11:30-13:30 (обед), 9:00-13:30 (Вс). **Бесплатно.**',
-                    name_en: 'Capuchin Day Centre (Main Center)',
+                    name_en: 'Capuchin Day Centre (Main Center)', 
                     description_en: 'Address: Bow St, D7. Times: 9:00-11:30 (tea/coffee), 11:30-13:30 (lunch), 9:00-13:30 (Sun). **Free.**'
                 },
                 { 
                     lat: 53.3440, lng: -6.2730, 
                     type: 'center', 
-                    name_ru: 'Merchants Quay Ireland (MQI)', 
-                    description_ru: 'Адрес: 22a/b Merchants Quay, D8. Часы работы: Пн-Пт, 9:00–13:00 (завтрак/дроп-ин). Предоставляет еду, консультации, туалет. Бесплатно.',
-                    name_en: 'Merchants Quay Ireland (MQI)',
+                    name_en: 'Merchants Quay Ireland (MQI)', 
                     description_en: 'Address: 22a/b Merchants Quay, D8. Hours: Mon-Fri, 9:00–13:00 (breakfast/drop-in). Provides food, advice, toilet. Free.'
                 },
                 { 
                     lat: 53.3430, lng: -6.2735, 
                     type: 'food', 
-                    name_ru: 'Open Access Service', 
-                    description_ru: 'Адрес: Johns Lane West, D8. Часы работы: Пн-Пт, 17:00–20:00. Бесплатно.',
-                    name_en: 'Open Access Service',
+                    name_en: 'Open Access Service', 
                     description_en: 'Address: Johns Lane West, D8. Hours: Mon-Fri, 17:00–20:00. Free.'
                 },
                 { 
                     lat: 53.3450, lng: -6.2740, 
                     type: 'food', 
-                    name_ru: 'Trocadero Theatre / Riverbank', 
-                    description_ru: 'Адрес: Riverbank, D8. Время: 7:30–9:00 (завтрак), 10:00–14:00 (обед), 16:00–18:00 (ужин). Бесплатно.',
-                    name_en: 'Trocadero Theatre / Riverbank',
+                    name_en: 'Trocadero Theatre / Riverbank', 
                     description_en: 'Address: Riverbank, D8. Times: 7:30–9:00 (breakfast), 10:00–14:00 (lunch), 16:00–18:00 (dinner). Free.'
                 }
             ];
             // =========================================================================================
 
-            // Инициализация карты (центр Дублина)
+            // Map Initialization (Dublin center)
             const map = L.map('map').setView([53.3498, -6.2603], 15);
             
-            // Добавление слоя OpenStreetMap
+            // Add OpenStreetMap layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -397,7 +340,7 @@
             let routeLine = null; 
             let destinationMarker = null; 
 
-            // Вспомогательная функция для отображения временного сообщения
+            // Helper function to display temporary status message
             function showStatusMessage(text) {
                 const messageEl = document.getElementById('status-message');
                 messageEl.textContent = text;
@@ -409,7 +352,7 @@
                 }, 3000);
             }
 
-            // Функция для определения местоположения пользователя
+            // Function to determine user location
             function getUserLocation() {
                 if ('geolocation' in navigator) {
                     navigator.geolocation.getCurrentPosition(
@@ -451,7 +394,7 @@
                                 }
                             }
 
-                            // Улучшенное логирование ошибки для отладки
+                            // Improved error logging for debugging
                             console.error(
                                 'Geolocation Error (Code/Message):', 
                                 error.code, 
@@ -467,9 +410,9 @@
                 }
             }
             
-            // Расчет дистанции (Формула Хаверсина)
+            // Distance calculation (Haversine Formula)
             function getDistance(lat1, lon1, lat2, lon2) {
-                const R = 6371e3; // метры
+                const R = 6371e3; // meters
                 const φ1 = lat1 * Math.PI/180;
                 const φ2 = lat2 * Math.PI/180;
                 const Δφ = (lat2-lat1) * Math.PI/180;
@@ -483,14 +426,14 @@
                 return R * c;
             }
 
-            // Функция для прокладки маршрута (возвращаем простую линию)
+            // Function to plot route (simple line)
             function plotRouteToPoint(destLatLng) {
                 if (!userMarker) {
                     showStatusMessage(T('need_location'));
                     return;
                 }
                 
-                // Очистка предыдущего маршрута и маркера назначения
+                // Clear previous route and destination marker
                 if (routeLine) {
                     map.removeLayer(routeLine);
                 }
@@ -500,12 +443,12 @@
 
                 const userLatLng = userMarker.getLatLng();
 
-                // Создание маркера назначения 
+                // Create destination marker 
                 destinationMarker = L.marker(destLatLng, { icon: icons.center })
                     .bindPopup(T('your_selected_point'))
                     .addTo(map);
 
-                // Создание линии маршрута
+                // Create route line
                 const latlngs = [userLatLng, destLatLng];
                 routeLine = L.polyline(latlngs, {
                     color: '#8b5cf6',
@@ -514,7 +457,7 @@
                     dashArray: '10, 10' 
                 }).addTo(map);
 
-                // Установка границ карты, чтобы показать обе точки
+                // Set map bounds to show both points
                 const bounds = L.latLngBounds(userLatLng, destLatLng);
                 map.fitBounds(bounds, { padding: [50, 50] });
 
@@ -522,7 +465,7 @@
                 showStatusMessage(T('new_destination', distanceKm));
             }
 
-            // Функция "Режим выживания" - находит ближайший центр помощи
+            // "Survival Mode" function - finds the nearest help center
             function findNearestHelpCenter() {
                 if (!userMarker) {
                     showStatusMessage(T('need_location'));
@@ -551,21 +494,21 @@
                 if (nearestPoint) {
                     plotRouteToPoint({ lat: nearestPoint.lat, lng: nearestPoint.lng });
                     const distanceKm = (minDistance / 1000).toFixed(2);
-                    const name = nearestPoint[`name_${currentLang}`] || nearestPoint.name_ru;
+                    const name = nearestPoint[`name_${currentLang}`];
                     showStatusMessage(T('nearest_point', name, distanceKm));
                 }
             }
 
-            // Функция для добавления/фильтрации маркеров на карте
+            // Function to add/filter markers on the map
             function addMarkers(filter = 'all') {
                 markersLayer.clearLayers();
                 pointsData.forEach(point => {
                     if (filter === 'all' || point.type === filter) {
                         const marker = L.marker([point.lat, point.lng], { icon: icons[point.type] });
                         
-                        // Получаем переведенные имя и описание
-                        const name = point[`name_${currentLang}`] || point.name_ru;
-                        const description = point[`description_${currentLang}`] || point.description_ru;
+                        // Get English name and description
+                        const name = point[`name_${currentLang}`];
+                        const description = point[`description_${currentLang}`];
 
                         const popupContent = document.createElement('div');
                         
@@ -589,12 +532,12 @@
                 });
             }
 
-            // Прикрепляем функцию к window, чтобы она работала из всплывающего окна
+            // Attach function to window so it can be called from the popup
             window.plotRouteToPoint = plotRouteToPoint;
 
-            // --- ОБРАБОТЧИКИ СОБЫТИЙ ---
+            // --- EVENT HANDLERS ---
 
-            // Обработчики для кнопок фильтров
+            // Handlers for filter buttons
             const filterButtons = document.querySelectorAll('.control-button[data-filter]');
             filterButtons.forEach(button => {
                 button.addEventListener('click', () => {
@@ -605,31 +548,25 @@
                 });
             });
 
-            // Обработчик для переключения языка
-            document.getElementById('lang-toggle-btn').addEventListener('click', () => {
-                currentLang = currentLang === 'ru' ? 'en' : 'ru';
-                updateUI();
-            });
-
-            // Обработчик для "Режима выживания"
+            // Handler for "Survival Mode"
             document.getElementById('survival-mode-btn').addEventListener('click', findNearestHelpCenter);
             
-            // Обработчик для "Найти меня"
+            // Handler for "Locate Me"
             document.getElementById('locate-me-btn').addEventListener('click', getUserLocation);
 
-            // Обработчик для сворачивания/разворачивания меню (мобильная адаптация)
+            // Handler for collapsing/expanding the menu (mobile adaptation)
             document.getElementById('menu-toggle-btn').addEventListener('click', () => {
                 const container = document.getElementById('filter-buttons-container');
                 container.classList.toggle('collapsed');
             });
 
-            // Обработчик для клика по карте (проложить маршрут к произвольной точке)
+            // Handler for map click (to plot route to an arbitrary point)
             map.on('click', function(e) {
                 plotRouteToPoint(e.latlng);
             });
 
-            // Начальная загрузка
-            updateUI(); // Обновление UI на русском по умолчанию
+            // Initial load
+            updateUI(); 
             getUserLocation();
         })();
     </script>
